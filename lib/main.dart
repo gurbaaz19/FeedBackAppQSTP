@@ -12,19 +12,19 @@ class QuestionsPage extends StatefulWidget {
   _QuestionsPageState createState() => _QuestionsPageState();
 }
 
+double sum = 0;
+int i = 0;
+double _currentSliderValue = 0;
+
 class _QuestionsPageState extends State<QuestionsPage> {
-  int i = 0;
-  double _currentSliderValue = 0;
   String buttonText = "Next";
-  double sum = 0;
-  bool completed = false;
   List<Question> questionList = [
-    Question("Rate the UI of this App1", 0),
-    Question("Rate the UI of this App2", 0),
-    Question("Rate the UI of this App3", 0),
-    Question("Rate the UI of this App4", 0),
-    Question("Rate the UI of this App5", 0),
-    Question("Rate the UI of this App6", 0),
+    Question("Rate the UI of this App on a scale of 5", 0),
+    Question("How would you rate your online campus life", 0),
+    Question("How would you rate your offline campus life", 0),
+    Question("How many best friend do you have?", 0),
+    Question("How many hours do you study in a day?", 0),
+    Question("How many hours do you play video games?", 0),
   ];
 
   @override
@@ -60,6 +60,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                     ),
                     border: Border.all(width: 3.0, color: Colors.red),
                   ),
+                  padding: EdgeInsets.all(10.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -69,6 +70,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
                           fontSize: 20.0,
                           fontWeight: FontWeight.bold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       Slider(
                         value: _currentSliderValue,
@@ -81,24 +83,29 @@ class _QuestionsPageState extends State<QuestionsPage> {
                         onChanged: (double value) {
                           setState(() {
                             _currentSliderValue = value;
-                            questionList[i].rating = value;
                           });
                         },
                       ),
                       ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              if (i < (questionList.length - 2))
+                              if (i < (questionList.length - 2)) {
+                                questionList[i].rating = _currentSliderValue;
                                 i++;
-                              else if (i < (questionList.length - 1)) {
+                              } else if (i < (questionList.length - 1)) {
+                                questionList[i].rating = _currentSliderValue;
                                 buttonText = "Finish";
                                 i++;
                               } else {
-                                buttonText = "Reset";
-                                completed = true;
+                                questionList[i].rating = _currentSliderValue;
                                 for (int j = 0; j < questionList.length; j++) {
                                   sum += questionList[j].rating;
                                 }
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Result()),
+                                );
                               }
                             });
                           },
@@ -130,4 +137,140 @@ class Question {
   double rating;
 
   Question(this.que, this.rating);
+}
+
+class Result extends StatefulWidget {
+  const Result({Key? key}) : super(key: key);
+
+  @override
+  _ResultState createState() => _ResultState();
+}
+
+class _ResultState extends State<Result> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue,
+      appBar: AppBar(
+        title: Text(
+          "FeedBack App",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.red,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 30.0),
+        child: Center(
+          child: Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: SizedBox(),
+              ),
+              Expanded(
+                flex: 1,
+                child: Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.0),
+                            gradient: LinearGradient(
+                              colors: [Colors.grey[400]!, Colors.grey[600]!],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            border: Border.all(width: 3.0, color: Colors.red),
+                          ),
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Result: ${sum.round()}",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              display(),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    i = 0;
+                                    sum = 0;
+                                    _currentSliderValue = 0.0;
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Reset"),
+                                  style: ButtonStyle(
+                                    foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.white),
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.red),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: SizedBox(),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget display() {
+    if (sum <= 10) {
+      return Center(
+        child: Container(
+            margin: EdgeInsets.all(20.0),
+            child: Text(
+              'We are sorry for your inconvenience.',
+              style: TextStyle(
+                  fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            )),
+      );
+    } else if (sum >= 11 && sum <= 20) {
+      return Center(
+        child: Container(
+            margin: EdgeInsets.all(20.0),
+            child: Text(
+              'Hope we serve you better next time.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.yellowAccent.shade700,
+                  fontWeight: FontWeight.bold),
+            )),
+      );
+    } else {
+      return Center(
+        child: Container(
+            margin: EdgeInsets.all(20.0),
+            child: Text(
+              'We hope you come back next time.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold),
+            )),
+      );
+    }
+  }
 }
